@@ -63,7 +63,7 @@ def sanitize_filename(filename):
 
 def log_rename(original_name, new_name):
     """
-    Log the renamed file information to a JSON file if it hasn't been logged before.
+    Log the renamed file information to a JSON file.
     
     :param original_name: The original filename
     :param new_name: The new filename
@@ -79,16 +79,11 @@ def log_rename(original_name, new_name):
     else:
         log_data = []
     
-    # Check if the rename operation has already been logged
-    if not any(entry["original_name"] == original_name and entry["new_name"] == new_name for entry in log_data):
-        log_data.append(log_entry)
-        
-        with open(LOG_FILE, 'w') as f:
-            json.dump(log_data, f, indent=2)
-        
-        print(f"Logged rename: '{original_name}' to '{new_name}'")
-    else:
-        print(f"Rename operation already logged: '{original_name}' to '{new_name}'")
+    log_data.append(log_entry)
+    
+    with open(LOG_FILE, 'w') as f:
+        json.dump(log_data, f, indent=2)
+    
     print(f"Logged rename: '{original_name}' to '{new_name}'")
 
 def check_if_renamed(filename):
@@ -113,17 +108,17 @@ def check_if_renamed(filename):
 
 def rename_file(file_path, new_name):
     """
-    Rename a file and log the change.
+    Rename a file and log the change if it hasn't been renamed before.
     
     :param file_path: The current path of the file
     :param new_name: The new name for the file
-    :return: The path of the renamed file
+    :return: True if the file was renamed, False otherwise
     """
     original_name = os.path.basename(file_path)
     
     if check_if_renamed(original_name):
         print(f"File '{original_name}' has already been renamed. Skipping.")
-        return file_path
+        return False
     
     directory = os.path.dirname(file_path)
     new_path = os.path.join(directory, new_name)
@@ -131,8 +126,7 @@ def rename_file(file_path, new_name):
     try:
         os.rename(file_path, new_path)
         log_rename(original_name, new_name)
-        print(f"Renamed file: '{original_name}' to '{new_name}'")
-        return new_path
+        return True
     except OSError as e:
         print(f"Error renaming file: {e}")
-        return file_path
+        return False

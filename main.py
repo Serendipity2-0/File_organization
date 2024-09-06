@@ -2,10 +2,11 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from openai import OpenAI
-from file_operations import detect_file_type_and_extract_content, rename_file, sanitize_filename, check_if_renamed, log_rename
+from file_operations import detect_file_type_and_extract_content, rename_file, sanitize_filename, check_if_renamed
 from openai_integration import create_assistant, generate_name_from_content
 from dotenv import load_dotenv
 import time
+import json
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -28,13 +29,15 @@ def rename_files_based_on_content(directory_path):
             print(f"\nProcessing file: {filename}")
             if not check_if_renamed(filename):
                 new_name = process_file(file_path, client, assistant, api_key)
-                if new_name and new_name != filename:
-                    if rename_with_retry(file_path, new_name):
-                        log_rename(filename, new_name)
+                if new_name:
+                    if new_name != filename:
+                        rename_with_retry(file_path, new_name)
+                    else:
+                        print(f"Generated name is the same as original for {filename}. Skipping.")
                 else:
-                    print(f"No new name generated for {filename} or new name is the same as original. Skipping.")
+                    print(f"Failed to generate a new name for {filename}. Skipping.")
             else:
-                print(f"File '{filename}' was already renamed in a previous run. Skipping this file.")
+                print(f"File '{filename}' has already been renamed. Skipping.")
     
     print("\nFile renaming process completed.")
 
@@ -56,9 +59,12 @@ def rename_with_retry(file_path, new_name):
     max_attempts = 5
     for attempt in range(max_attempts):
         try:
-            rename_file(file_path, new_name)
-            print(f"Renamed file: '{os.path.basename(file_path)}' to '{new_name}'")
-            return True
+            if rename_file(file_path, new_name):
+                print(f"Renamed file: '{os.path.basename(file_path)}' to '{new_name}'")
+                return True
+            else:
+                print(f"File '{os.path.basename(file_path)}' was not renamed as it has already been renamed before.")
+                return False
         except PermissionError:
             print(f"File is in use. Retrying in 2 seconds... (Attempt {attempt + 1}/{max_attempts})")
             time.sleep(2)

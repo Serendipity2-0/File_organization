@@ -24,7 +24,7 @@ def generate_name_from_content(file_path, client, assistant, content):
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=f'Generate a concise and descriptive filename for this file based on its content and the original filename, without file extension. The new filename should be similar in length to the original. Enclose the filename in quotes. Original filename: "{original_filename}" Content: "{truncated_content}"'
+            content=f'Generate a concise and descriptive filename for this file based on its content and the original filename, without file extension. Enclose the filename in quotes. Original filename: "{original_filename}" Content: "{truncated_content}"'
         )
         
         run = client.beta.threads.runs.create(
