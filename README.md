@@ -19,7 +19,7 @@ File Organizer is a Python application that automatically renames files based on
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/file-organizer.git
+   git clone https://github.com/Serendipity2-0/file-organizer.git
    cd file-organizer
    ```
 
